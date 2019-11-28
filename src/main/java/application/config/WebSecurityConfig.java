@@ -13,6 +13,15 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import java.util.Arrays;
 
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -33,13 +42,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         System.out.println("Дайте просто умереть");
-        http
+        http.cors()
+                .and()
                 .authorizeRequests()
-                .antMatchers("/", "/home","/register").permitAll()
-                .anyRequest().authenticated();
-        http
+                .antMatchers("/", "/home","/api/register").permitAll()
+                .anyRequest().authenticated().and()
                 .formLogin()
-                .loginPage("/login")
+                .loginPage("http://localhost:8080/#/login")
+                .loginProcessingUrl("/login")
                 .permitAll()
                 .and()
                 .logout()
@@ -64,5 +74,30 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         super.configure(web);
     }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurerAdapter() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**").allowedOrigins("*").allowCredentials(true).allowedMethods().allowedHeaders();
+            }
+        };
+    }
+    /*@Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://localhost:8180"));
+        configuration.setAllowedMethods(Arrays.asList(  RequestMethod.GET.name(),
+                    RequestMethod.POST.name(),
+                    RequestMethod.OPTIONS.name(),
+                    RequestMethod.DELETE.name(),
+                    RequestMethod.PUT.name()));
+        configuration.setExposedHeaders(Arrays.asList("x-auth-token", "x-requested-with", "x-xsrf-token"));
+        configuration.setAllowedHeaders(Arrays.asList("X-Auth-Token","x-auth-token", "x-requested-with", "x-xsrf-token"));
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }*/
 
 }

@@ -14,32 +14,33 @@ public class UserController {
     @Autowired
     private UserDAO userService;
 
-    @PostMapping("/register")
+    @CrossOrigin
+    @PostMapping("api/register")
     public ResponseEntity<?> createUser(@RequestBody User newUser) {
         if (userService.findByUsername(newUser.getUsername()) != null) {
             System.out.println("username Already exist " + newUser.getUsername());
             return new ResponseEntity<>(
-                    new RuntimeException("User with username " + newUser.getUsername() + "already exist "),
+                    new RuntimeException("User with username " + newUser.getUsername() + "already exist"),
                     HttpStatus.CONFLICT);
         }
-
         System.out.println("user registered " + newUser.getUsername());
-        return new ResponseEntity<>(userService.save(newUser), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.save(newUser), HttpStatus.OK);
     }
 
-    @GetMapping("/register")
-    public ResponseEntity<?> createUser(@RequestParam(value = "username") String username, @RequestParam(value = "password") String password) {
+    @CrossOrigin
+    @GetMapping("api/register")
+    public ResponseEntity<?> createUser(@RequestParam(value = "j_username") String username, @RequestParam(value = "j_password") String password) {
         if (userService.findByUsername(username) != null) {
             System.out.println("username Already exist " + username);
             return new ResponseEntity<>(
-                    new RuntimeException("User with username " + username + "already exist "),
+                    new RuntimeException("User with username " + username + "already exist"),
                     HttpStatus.CONFLICT);
         }
-
         System.out.println("user registered " + username);
         return new ResponseEntity<>(userService.save(new User(username,password)), HttpStatus.CREATED);
     }
 
+    @CrossOrigin
     @RequestMapping("/login")
     public Principal user(Principal principal) {
         System.out.println("user logged "+principal);
